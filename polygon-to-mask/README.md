@@ -2,6 +2,7 @@
 * Convert Polygons from Image, Video Project
 
 ## Prerequisite
+* Python 3.6+
 * Install python dependencies
 ```
 $ pipenv install
