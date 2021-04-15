@@ -20,6 +20,12 @@ $ pip install -r requirements.txt
    * This is because our mask uses 8-bit color map to represent pixel values from 0 to 255
    * class and instance index starts from 1 w.r.t. 'object_classes' in project.json or 'objects' in label JSON
 
+<p float="middle">
+  <img src="assets/img/all_annotations.png" width="300"/>
+  <img src="assets/img/mask_by_class_id.png" width="300"/>
+  <img src="assets/img/mask_by_instance_id.png" width="300"/>
+</p>
+
 ### Image (New) Project
 ```
 # Change "image-sample" to your exported file name
