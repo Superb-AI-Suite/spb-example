@@ -12,13 +12,22 @@ $ pip install -r requirements.txt
 ## Convert Export Results
 * Download the export results from the Export History Tab [Link](https://docs.superb-ai.com/user-manual/manipulate-labels/export-and-download-labels)
    * Sample export results, one for image and video project each, are available in the [exports](exports) folder.
+
 * [Export result format](https://docs.superb-ai.com/user-manual/manipulate-labels/export-result-format)
     * Previously, bitmap mask images were included in exported zip files but this function has been deprecated.
     * Please use this code to create bitmap masks for polygon segmentations.
+
 * Note! - Only labels submitted through [our annotations app](https://docs.superb-ai.com/user-manual/manage-annotations/create-edit-delete-annotations#create-annotations) will be processed to create the mask images. This code will skip any labels that did not go through our annotation app after being Auto-labeled or uploaded using the CLI/SDK.
+
 * The color map that we use to create the masks is hard-coded. Please feel free to check and edit our code to change the colors. The color of the mask images will be different from the colors you see on the web interface (our detailed view or annotation app).
    * This is because our mask uses 8-bit color map to represent pixel values from 0 to 255
    * Class and instance index starts from 1, with respect to the 'object_classes' list in the project.json file or 'objects' list in each of the label JSON files. 
+
+<p float="middle">
+  <img src="assets/img/all_annotations.png" width="300"/>
+  <img src="assets/img/mask_by_class_id.png" width="300"/>
+  <img src="assets/img/mask_by_instance_id.png" width="300"/>
+</p>
 
 ### Image (New) Project
 * If you've selected "Image (New)" as the project's Data Type, you can run the following code. 
@@ -32,6 +41,7 @@ $ cd exports; unzip image-sample.zip; cd ..
 $ cd src
 $ python main.py --path ../exports/
 ```
+
 
 * masks will be saved under the following directory
 ```
@@ -52,6 +62,7 @@ exports
          ...
 ```
 
+
 ### Video Project 
 * If you've selected "Video" as the project's Data Type, you can run the following code. 
 ```
@@ -64,6 +75,7 @@ $ cd exports; unzip video-sample.zip; cd ..
 $ cd src
 $ python main.py --path ../exports/
 ```
+
 
 * masks will be saved under the following directory
 ```
