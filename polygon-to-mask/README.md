@@ -26,12 +26,12 @@ $ pipenv install
 $ cd exports; unzip image-sample.zip; cd ..
 # run code
 $ cd src
-$ python main.py --path ../exports/image-sample
+$ python main.py --path ../exports/
 ```
 
 * masks will be saved under given directory
 ```
-image-sample
+exports
 └─ project.json              # projects.json, labels, meta existed before
 └─ labels
 └─ meta
@@ -51,12 +51,12 @@ image-sample
 $ cd exports; unzip video-sample.zip; cd ..
 # run code
 $ cd src
-$ python main.py --path ../exports/video-sample
+$ python main.py --path ../exports/
 ```
 
 * masks will be saved under given directory
 ```
-video-sample
+exports
 └─ project.json              # projects.json, labels, meta existed before
 └─ labels
 └─ meta
