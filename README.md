@@ -6,6 +6,8 @@
 | Directory | Description |
 |-----------|-------------|
 | [Image Basic](sdk-example-image-basic) | Basic SDK Example for Image Projects |
+| [Polygon to Bitmask](polygon-to-mask) | Convert exported polygon segmentation result to bitmask |
+| [Suite-Pachyderm Integration](suite-pachyderm-integration) | Suite - Pachyderm import / export examples |
 
 
 ## Contributing
