@@ -8,6 +8,7 @@
 | [Image Basic](sdk-example-image-basic) | Basic SDK Example for Image Projects |
 | [Polygon to Bitmask](polygon-to-mask) | Convert exported polygon segmentation result to bitmask |
 | [Suite-Pachyderm Integration](suite-pachyderm-integration) | Suite - Pachyderm import / export examples |
+| [Create COCO Sample](create-coco-project) | Upload COCO format Dataset to the Suite |
 
 
 ## Contributing
