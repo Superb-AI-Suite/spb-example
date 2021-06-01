@@ -12,7 +12,7 @@ def process(args):
     project_type, categories = read_project(project_json)
 
     meta_map = {}
-    for p in Path(export_dir, 'meta').glob('**/*.json'):
+    for p in Path(export_dir, 'meta').rglob('*.json'):
         with open(p, 'r', encoding='utf-8') as f:
             meta = json.load(f)
         meta_map[(meta['dataset'], meta['data_key'])] = meta
