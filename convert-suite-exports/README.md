@@ -21,3 +21,8 @@ $ pip install -r requirements.txt
 ```
 $ python convert.py --export-dir {EXPORT_DIR} --output-path {OUTPUT_PATH} --dataset-type COCO
 ```
+
+## Notes
+### RLE
+* use pycocotools to decode compressed RLE
+    * https://github.com/cocodataset/cocoapi/blob/master/PythonAPI/pycocotools/coco.py#L268

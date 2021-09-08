@@ -86,7 +86,7 @@ def read_labels(labels, project_type, categories, images):
         else:
             raise NotImplementedError
         for anno in annotations_in_label:
-            if anno.get('segmentation') is not None:
+            if anno.get('segmentation') is not None and 'counts' not in anno['segmentation']:
                 anno['segmentation'] = [
                     Decimal(x).quantize(Decimal('.01'), rounding=ROUND_DOWN)
                     for x in anno['segmentation']
@@ -111,7 +111,8 @@ def read_death_valley_label(label, category_map, image):
             area = o['shape']['width'] * o['shape']['height']
             segmentation = None
         elif 'polygon' in o['shape']:
-            bbox, area, segmentation, rle = convert_polygon_to_coco(o['shape']['polygon'], image)
+            bbox, area, segmentation, _ = convert_polygon_to_coco(o['shape']['polygon'], image)
+            # bbox, area, _, segmentation = convert_polygon_to_coco(o['annotation']['coord']['points'], image) # Use this for RLE segmentation
         else:
             continue
         annotations.append({
@@ -119,7 +120,6 @@ def read_death_valley_label(label, category_map, image):
             'bbox': bbox,
             'area': area,
             'segmentation': segmentation,
-            # 'rle': rle, # uncomment this line to use RLE
         })
     return annotations
 
@@ -137,23 +137,32 @@ def read_siesta_label(label, project_type, category_map, image):
             c = o['annotation']['coord']
             bbox = [c['x'], c['y'], c['width'], c['height']]
             area = c['width'] * c['height']
-            segmentation, rle = None, None
+            segmentation = None
         elif o[ANNO_KEY] == 'polygon':
-            bbox, area, segmentation, rle = convert_polygon_to_coco(o['annotation']['coord']['points'], image)
+            if o['annotation'].get('multiple', False):
+                # Polygon point segmentation is not available in multipolygon
+                bbox, area, _, segmentation = convert_multi_polygon_to_coco(o['annotation']['coord']['points'], image)
+            else:
+                bbox, area, segmentation, _ = convert_polygon_to_coco(o['annotation']['coord']['points'], image)
+                # bbox, area, _, segmentation = convert_polygon_to_coco(o['annotation']['coord']['points'], image) # Use this for RLE segmentation
         else:
             continue
+
         annotations.append({
             'category_id': category_map[o[CLASS_NAME_KEY]],
             'bbox': bbox,
             'area': area,
             'segmentation': segmentation,
-            # 'rle': rle, # uncomment this line to use RLE
         })
     return annotations
 
 
+def to_coco_polygon(suite_poly):
+    return [z for v in suite_poly for z in [v['x'], v['y']]]
+
+
 def convert_polygon_to_coco(points, image):
-    polygon = [z for v in points for z in [v['x'], v['y']]]
+    polygon = to_coco_polygon(points)
     mask_image = Image.new('L', (image['width'], image['height']), 0)
     ImageDraw.Draw(mask_image).polygon(polygon, outline=1, fill=1)
     mask = np.array(mask_image)
@@ -164,4 +173,25 @@ def convert_polygon_to_coco(points, image):
     bbox = list(coco_mask.toBbox(rle)[0])
     area = int(coco_mask.area(rle)[0])
 
-    return bbox, area, polygon, rle
+    return bbox, area, [polygon], rle[0]
+
+
+def convert_multi_polygon_to_coco(points, image):
+    """
+    points is triple nested list of points consist of x and y.
+    * Ref: Multipolygon in https://en.wikipedia.org/wiki/GeoJSON#Geometries
+    """
+    mask_image = Image.new('L', (image['width'], image['height']), 0)
+    for face_polygons in points:
+        ImageDraw.Draw(mask_image).polygon(to_coco_polygon(face_polygons[0]), outline=1, fill=1)
+        for hole in face_polygons[1:]:
+            ImageDraw.Draw(mask_image).polygon(to_coco_polygon(hole), outline=1, fill=0)
+    mask = np.array(mask_image)
+
+    from pycocotools import _mask as coco_mask
+    mask = np.asfortranarray(mask.reshape(mask.shape[0], mask.shape[1], 1))
+    rle = coco_mask.encode(mask)
+    bbox = list(coco_mask.toBbox(rle)[0])
+    area = int(coco_mask.area(rle)[0])
+
+    return bbox, area, None, rle[0]
