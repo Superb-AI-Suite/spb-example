@@ -13,6 +13,7 @@ $ pip install -r requirements.txt
 * (WIP: Pascal VOC, YOLO)
 ### Annotation types
 * Bounding box, Polygon segmentation
+    * Please note that our RLE is compressed RLE string. It's also supported through cocoapi
 * (WIP: Keypoints, categorization)
 
 ## Convert Export Results
