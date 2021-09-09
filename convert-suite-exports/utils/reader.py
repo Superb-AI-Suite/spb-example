@@ -87,10 +87,10 @@ def read_labels(labels, project_type, categories, images):
             raise NotImplementedError
         for anno in annotations_in_label:
             if anno.get('segmentation') is not None and 'counts' not in anno['segmentation']:
-                anno['segmentation'] = [
+                anno['segmentation'] = [[
                     Decimal(x).quantize(Decimal('.01'), rounding=ROUND_DOWN)
-                    for x in anno['segmentation']
-                ]
+                    for x in anno['segmentation'][0]
+                ]]
             anno['bbox'] = [Decimal(x).quantize(Decimal('.01'), rounding=ROUND_DOWN) for x in anno['bbox']]
             anno['area'] = Decimal(anno['area']).quantize(Decimal('.01'), rounding=ROUND_DOWN) 
 
