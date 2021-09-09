@@ -13,6 +13,8 @@ $ pip install -r requirements.txt
 * (WIP: Pascal VOC, YOLO)
 ### Annotation types
 * Bounding box, Polygon segmentation
+    * Please note that RLE segmentation output is compressed RLE string. It's also supported through cocoapi
+    * COCO stuff segmentation task uses compressed RLE string.
 * (WIP: Keypoints, categorization)
 
 ## Convert Export Results
