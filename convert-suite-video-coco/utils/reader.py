@@ -28,12 +28,26 @@ def read_siesta_project(project_json):
         for o_id in g['object_class_ids']
     }
     categories = []
+    kp_categories = []
+
     for o in project_json['object_detection']['object_classes']:
         if o['annotation_type'] in ['box', 'polygon', 'rbox']:
             categories.append({
                 'id': len(categories) + 1,
                 'name': o['name'],
                 'supercategory': object_class_to_group_name.get(o['id'])
+            })
+        elif o['annotation_type'] in ['keypoint']:
+            points = project_json['object_detection']['keypoints'][len(
+                kp_categories)]['points']
+            edges = project_json['object_detection']['keypoints'][len(
+                kp_categories)]['edges']
+            categories.append({
+                'id': len(kp_categories) + 1,
+                'name': o['name'],
+                'supercategory': object_class_to_group_name.get(o['id']),
+                'keypoints': [point['name'] for point in points],
+                'skeleton': [[edge['u'], edge['v']] for edge in edges]
             })
     return project_type, categories
 
@@ -114,6 +128,10 @@ def read_labels(labels, project_type, categories, images):
                 Decimal('.01'), rounding=ROUND_DOWN) for x in anno['bbox']]
             anno['area'] = Decimal(anno['area']).quantize(
                 Decimal('.01'), rounding=ROUND_DOWN)
+            if 'keypoints' in anno:
+                anno['keypoints'] = [Decimal(x).quantize(
+                    Decimal('.01'), rounding=ROUND_DOWN) for x in anno['keypoints']]
+
             if not project_type == 'video_project':
                 annotations.append({
                     'id': len(annotations) + 1,
@@ -147,48 +165,6 @@ def read_death_valley_label(label, category_map, image):
     return annotations
 
 
-def read_video_label(label, category_map, image):
-    ANNO_KEY = 'annotation_type'
-    CLASS_NAME_KEY = 'class_name'
-    annotations = []
-    count = 0
-    # We are changing the video json to match the image json here
-    changed_label, count = VTI.parse_label(label, count)
-    # changed label is basically objects
-    # for incruit we will grab only the first frame as that was what was requested
-    # if you want this to run for all the frames you will need to run a for loop that goes
-    # through all the frames
-    objects = changed_label[0]
-    for o in objects:
-        if o[ANNO_KEY] == 'box':
-            c = o['annotation']['coord']
-            bbox = [c['x'], c['y'], c['width'], c['height']]
-            area = c['width'] * c['height']
-            segmentation = None
-        elif o[ANNO_KEY] == 'polygon':
-            if o['annotation'].get('multiple', False):
-                # Polygon point segmentation is not available in multipolygon
-                bbox, area, _, segmentation = convert_multi_polygon_to_coco(
-                    o['annotation']['coord']['points'], image)
-            else:
-                bbox, area, segmentation, _ = convert_polygon_to_coco(
-                    o['annotation']['coord']['points'], image)
-                # bbox, area, _, segmentation = convert_polygon_to_coco(o['annotation']['coord']['points'], image) # Use this for RLE segmentation
-        else:
-            continue
-
-        annotations.append({
-            'id': len(annotations) + 1,
-            'image_id': image_id,
-            'is_crowd': 0,
-            'category_id': category_map[o[CLASS_NAME_KEY]],
-            'bbox': bbox,
-            'area': area,
-            'segmentation': segmentation,
-        })
-    return annotations
-
-
 def read_siesta_label(label, project_type, category_map, image):
     if project_type == 'siesta-v1':
         ANNO_KEY = 'annotationType'
@@ -197,6 +173,8 @@ def read_siesta_label(label, project_type, category_map, image):
         ANNO_KEY = 'annotation_type'
         CLASS_NAME_KEY = 'class_name'
     annotations = []
+    kp_annotations = []
+
     for o in label['objects']:
         if o[ANNO_KEY] == 'box':
             c = o['annotation']['coord']
@@ -218,6 +196,17 @@ def read_siesta_label(label, project_type, category_map, image):
                 bbox, area, segmentation, _ = convert_polygon_to_coco(
                     o['annotation']['coord']['points'], image)
                 # bbox, area, _, segmentation = convert_polygon_to_coco(o['annotation']['coord']['points'], image) # Use this for RLE segmentation
+        elif o[ANNO_KEY] == 'keypoint':
+            bbox, area, segmentation, keypoints, num_keypoints = convert_keypoint_to_coco(
+                o['annotation']['coord']['points'])
+            annotations.append({
+                'category_id': category_map[o[CLASS_NAME_KEY]],
+                'bbox': bbox,
+                'area': area,
+                'segmentation': segmentation,
+                'keypoints': keypoints,
+                'num_keypoints': num_keypoints,
+            })
         else:
             continue
 
@@ -293,3 +282,35 @@ def rotate_points(coord, angle):
         polygon_points.append({'x': obj[0], 'y': obj[1]})
 
     return polygon_points
+
+
+def convert_keypoint_to_coco(points):
+    keypoints = []
+    x, y, x_max, y_max = float('inf'), float('inf'), 0, 0
+    num_keypoints = 0
+    for point in points:
+        if point['x'] or point['y']:
+            if x > point['x']:
+                x = point['x']
+            if x_max < point['x']:
+                x_max = point['x']
+            if y > point['y']:
+                y = point['y']
+            if y_max < point['y']:
+                y_max = point['y']
+        if point['state']['visible']:
+            keypoints.append(point['x'])
+            keypoints.append(point['y'])
+            keypoints.append(2)
+            num_keypoints += 1
+        # TODO: state discrimination (three state)
+        else:
+            keypoints.append(0)
+            keypoints.append(0)
+            keypoints.append(1)
+    width, height = x_max-x, y_max-y
+    bbox = [x, y, width, height]
+    area = width * height
+    polygon = [[]]
+
+    return bbox, area, polygon, keypoints, num_keypoints
