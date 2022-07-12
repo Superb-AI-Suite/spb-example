@@ -18,11 +18,11 @@ $ pip install -r requirements.txt
 
 ### Annotation types
 
-- Bounding box, Polygon segmentation, Rotated Box
+- Bounding box, Polygon segmentation, Rotated Box, Keypoints
   - Please note that RLE segmentation output is compressed RLE string. It's also supported through cocoapi
   - COCO stuff segmentation task uses compressed RLE string.
   - Please note that since COCO does not have a Rotated Box, we turn our Rotated Box into Polygon format
-- (WIP: Keypoints, categorization)
+- (WIP: categorization)
 
 ## Convert Export Results
 
