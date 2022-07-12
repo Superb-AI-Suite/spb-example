@@ -3,6 +3,7 @@ from PIL import Image, ImageDraw
 import numpy as np
 from decimal import Decimal, ROUND_DOWN
 import utils.video_to_image as VTI
+import math
 
 
 def read_project(project_json):
@@ -28,7 +29,7 @@ def read_siesta_project(project_json):
     }
     categories = []
     for o in project_json['object_detection']['object_classes']:
-        if o['annotation_type'] in ['box', 'polygon']:
+        if o['annotation_type'] in ['box', 'polygon', 'rbox']:
             categories.append({
                 'id': len(categories) + 1,
                 'name': o['name'],
@@ -82,33 +83,6 @@ def read_meta(meta_map):
             'label_path': meta['label_path']
         }
     return images, labels
-
-
-# def read_meta(meta_map):
-#     images = []
-#     labels = {}
-#     count = 0
-#     for (dataset, data_key) in enumerate(meta_map.keys()):
-#         meta = meta_map[(dataset, data_key)]
-#         for num, frame in enumerate(meta['frames']):
-#             if 'height' not in meta['image_info'] or 'width' not in meta['image_info']:
-#                 raise Exception(
-#                     'Only labels annotated through annotation app is supported.')
-#             images.append({
-#                 'id': count,
-#                 'license': None,
-#                 'dataset': dataset,
-#                 'file_name': str(Path(data_key)/frame),
-#                 'height': meta['image_info']['height'],
-#                 'width': meta['image_info']['width'],
-#                 'date_captured': None,
-#             })
-#             labels[meta['label_id']] = {
-#                 'image_id': count,
-#                 'label_path': meta['label_path']
-#             }
-#             count += 1
-#     return images, labels
 
 
 def read_labels(labels, project_type, categories, images):
@@ -229,6 +203,12 @@ def read_siesta_label(label, project_type, category_map, image):
             bbox = [c['x'], c['y'], c['width'], c['height']]
             area = c['width'] * c['height']
             segmentation = None
+        elif o[ANNO_KEY] == 'rbox':
+            # this will trun Superb AI Suite rbox to COCO polygon
+            c = o['annotation']['coord']
+            polygon_points = rotate_points(c, c['angle'])
+            bbox, area, _, segmentation = convert_multi_polygon_to_coco(
+                [[polygon_points]], image)
         elif o[ANNO_KEY] == 'polygon':
             if o['annotation'].get('multiple', False):
                 # Polygon point segmentation is not available in multipolygon
@@ -290,3 +270,26 @@ def convert_multi_polygon_to_coco(points, image):
     area = int(coco_mask.area(rle)[0])
 
     return bbox, area, None, rle[0]
+
+
+def rotate_points(coord, angle):
+    width = coord['width']
+    height = coord['height']
+    center_point = [coord['cx'], coord['cy']]
+    origin_left_top_point = [-width/2, -height/2]
+    origin_right_top_point = [width/2, -height/2]
+    origin_right_bottom_point = [width/2, height/2]
+    origin_left_bottom_point = [-width/2, height/2]
+    origin_points = [origin_left_top_point, origin_right_top_point,
+                     origin_right_bottom_point, origin_left_bottom_point, origin_left_top_point]
+
+    rotated_points = []
+    for pts in origin_points:
+        rotated_points.append([(pts[0]*(math.cos(-(90 + angle)))) - (pts[1]*(math.sin(-(90 + angle)))) + center_point[0],
+                               (pts[0]*(math.sin(-(90 + angle)))) + (pts[1]*(math.cos(-(90 + angle)))) + center_point[1]])
+
+    polygon_points = []
+    for obj in rotated_points:
+        polygon_points.append({'x': obj[0], 'y': obj[1]})
+
+    return polygon_points

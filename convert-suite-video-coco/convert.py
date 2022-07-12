@@ -11,8 +11,6 @@ def process(args):
     with open(Path(export_dir) / 'project.json', 'r', encoding='utf-8') as f:
         project_json = json.load(f)
     project_type, categories = read_project(project_json)
-    print(project_type)
-    print(categories)
     meta_map = {}
     label_dict = {}
     is_video = False
@@ -35,7 +33,6 @@ def process(args):
                 label_dict[label_path] = json.load(f)
         new_project_path, new_project_json, new_meta_dict, new_label_dict = read_vti(
             meta_map, project_json, label_dict)
-        print(new_meta_dict)
         images, labels = read_meta(new_meta_dict)
         project_type, categories = read_project(new_project_json)
 
