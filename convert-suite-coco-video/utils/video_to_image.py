@@ -33,7 +33,7 @@ def convert_label_interface(project_json):
     return new_project_json
 
 
-def parse_label(label, count):
+def parse_label(label):
     num2obj_mapping = {}
     if label:
         objects = label['objects']
@@ -52,12 +52,12 @@ def parse_label(label, count):
                 }
                 if num in num2obj_mapping:
                     num2obj_mapping[num].append(new_obj)
-                    count += 1
+                    # count += 1
                 else:
                     num2obj_mapping[num] = [new_obj]
-                    count += 1
+                    # count += 1
 
-    return num2obj_mapping, count
+    return num2obj_mapping
 
 
 def read_vti(meta_map, project_json, label_dict):
@@ -103,11 +103,13 @@ def read_vti(meta_map, project_json, label_dict):
                 'last_updated_date': meta['last_updated_date'],
                 'tags': meta['tags'],
                 'work_assignee': meta['work_assignee'],
-                'status': meta['status']
+                'status': meta['status'],
+                'height': meta['image_info']['height'],
+                'width': meta['image_info']['width']
             }
             meta_output_path = os.path.join(
                 *['meta', write_dir, frame]) + '.json'
-            new_meta_dict[meta_output_path] = new_meta
+            new_meta_dict[(write_dir, frame)] = new_meta
 
     return new_project_path, new_project_json, new_meta_dict, new_label_dict
 

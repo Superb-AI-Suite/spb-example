@@ -14,14 +14,15 @@ def process(args):
     print(project_type)
     print(categories)
     meta_map = {}
+    label_dict = {}
     is_video = False
     for p in Path(export_dir, 'meta').rglob('*.json'):
         with open(p, 'r', encoding='utf-8') as f:
             meta = json.load(f)
         meta_map[(meta['dataset'], meta['data_key'])] = meta
+        label_dict[meta['label_path'][0]] = {}
         if 'frames' in meta:
             is_video = True
-            print("hererer")
     if is_video == False:
         images, labels = read_meta(meta_map)
         for label_id in list(labels.keys()):
@@ -29,12 +30,17 @@ def process(args):
                 labels[label_id]['label'] = json.load(f)
         annotations = read_labels(labels, project_type, categories, images)
     if is_video == True:
+        for label_path in list(label_dict.keys()):
+            with open(Path(export_dir) / f'{label_path}', 'r', encoding='utf-8') as f:
+                label_dict[label_path] = json.load(f)
         new_project_path, new_project_json, new_meta_dict, new_label_dict = read_vti(
-            meta_map, project_json)
+            meta_map, project_json, label_dict)
+        print(new_meta_dict)
         images, labels = read_meta(new_meta_dict)
-        project_type = 'siesta-v2'
+        project_type, categories = read_project(new_project_json)
+
         for label_id in list(labels.keys()):
-            labels[label_id]['label'] = new_label_dict[label_id]
+            labels[label_id]['label'] = new_label_dict[labels[label_id]['label_path']]
         annotations = read_labels(labels, project_type, categories, images)
 
     result = {
