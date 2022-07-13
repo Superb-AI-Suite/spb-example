@@ -1,6 +1,0 @@
-Pillow==8.0.1
-tqdm==4.46.1
-numpy==1.19.5
-semver==2.13.0
-pycocotools==2.0.2
-simplejson==3.17.2
