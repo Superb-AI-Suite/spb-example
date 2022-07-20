@@ -15,12 +15,10 @@ def process(args):
         with open(Path(export_dir) / f'{meta_map[data_key]}', 'r', encoding='utf-8') as f:
             label = json.load(f)
             result['result'] = label
-            print(result)
             folder = data_key.split('/')[:-1]
             output_folder = ''
             for obj in folder:
                 output_folder = output_folder + obj + '/'
-            print(output_folder)
             os.makedirs(os.path.join(
                 output_path, output_folder), exist_ok=True)
 
