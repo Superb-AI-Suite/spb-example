@@ -97,7 +97,7 @@ def read_labels(labels, project_type, categories, images):
             annotations.append({
                 'id': len(annotations) + 1,
                 'image_id': image_id,
-                'is_crowd': 0,
+                'iscrowd': 0,
                 **anno
             })
     return annotations
