@@ -1,49 +1,54 @@
-from pathlib import Path
-import simplejson as json
-from datetime import datetime
-
-from utils.reader import read_project, read_meta, read_labels
+from coco import to_coco
+from config import dataset_convert_choices
+from utils.export_parser import parse_export_zip_file
+from yolo import to_yolo
 
 
 def process(args):
-    export_dir, output_path = args.export_dir, args.output_path
-    with open(Path(export_dir) / 'project.json', 'r', encoding='utf-8') as f:
-        project_json = json.load(f)
-    project_type, categories = read_project(project_json)
+    export_path, output_path, dataset_type = (
+        args.export_path,
+        args.output_path,
+        args.dataset_type,
+    )
 
-    meta_map = {}
-    for p in Path(export_dir, 'meta').rglob('*.json'):
-        with open(p, 'r', encoding='utf-8') as f:
-            meta = json.load(f)
-        meta_map[(meta['dataset'], meta['data_key'])] = meta
-    images, labels = read_meta(meta_map)
-    for label_id in list(labels.keys()):
-        with open(Path(export_dir) / 'labels' / f'{label_id}.json', 'r', encoding='utf-8') as f:
-            labels[label_id]['label'] = json.load(f)
-    annotations = read_labels(labels, project_type, categories, images)
+    meta_json_list, label_json, project_json = parse_export_zip_file(export_path)
 
-    result = {
-        'info': {
-            'description': "Exported from Superb AI Suite",
-            'contributor': "Superb AI",
-            'url': "https://www.superb-ai.com/",
-            'date_created': str(datetime.now().isoformat())
-        },
-        'licenses': [],
-        'categories': categories,
-        'images': images,
-        'annotations': annotations
-    }
-    Path(output_path).parents[0].mkdir(parents=True, exist_ok=True)
-    with open(Path(output_path), 'w', encoding='utf-8') as f:
-        json.dump(result, f)
+    assert dataset_type in dataset_convert_choices
+
+    if dataset_type == "COCO":
+        to_coco(
+            output_path=output_path,
+            meta_json_list=meta_json_list,
+            label_json=label_json,
+            project_json=project_json,
+        )
+    elif dataset_type == "YOLO":
+        to_yolo(
+            output_path=output_path,
+            meta_json_list=meta_json_list,
+            label_json=label_json,
+            project_json=project_json,
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser()
-    parser.add_argument('--export-dir', type=str, required=True, help='directory of unzipped export result')
-    parser.add_argument('--output-path', type=str, default='instance.json', help='output path to save converted dataset')
-    parser.add_argument('--dataset-type', type=str, default='COCO', choices=['COCO'])
+    parser.add_argument(
+        "--export-path",
+        type=str,
+        required=True,
+        help="directory of export zip file",
+    )
+    parser.add_argument(
+        "--output-path",
+        type=str,
+        default="converted_result",
+        help="output path to save converted dataset",
+    )
+    parser.add_argument(
+        "--dataset-type", type=str, default="COCO", choices=dataset_convert_choices
+    )
     args = parser.parse_args()
     process(args)
