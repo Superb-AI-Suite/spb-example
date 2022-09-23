@@ -1,0 +1,1 @@
+dataset_convert_choices = ['COCO', 'YOLO']
