@@ -10,14 +10,14 @@ $ pip install -r requirements.txt
 * WIP: Docker version
 
 ## Convert Export Results
-* Download the export results from the Export History Tab [Link](https://docs.superb-ai.com/user-manual/manipulate-labels/export-and-download-labels)
+* Download the export results from the Export History Tab [Link](https://docs.superb-ai.com/docs/export-and-download-labels)
    * Sample export results, one for image and video project each, are available in the [exports](exports) folder.
 
-* [Export result format](https://docs.superb-ai.com/user-manual/manipulate-labels/export-result-format)
+* [Export result format](https://docs.superb-ai.com/docs/export-result-format)
     * Previously, bitmap mask images were included in exported zip files but this function has been deprecated.
     * Please use this code to create bitmap masks for polygon segmentations.
 
-* Note! - Only labels submitted through [our annotations app](https://docs.superb-ai.com/user-manual/manage-annotations/create-edit-delete-annotations#create-annotations) will be processed to create the mask images. This code will skip any labels that did not go through our annotation app after being Auto-labeled or uploaded using the CLI/SDK.
+* Note! - Only labels submitted through [our annotations app](https://docs.superb-ai.com/docs/create-edit-and-delete-annotations) will be processed to create the mask images. This code will skip any labels that did not go through our annotation app after being Auto-labeled or uploaded using the CLI/SDK.
 
 * The color map that we use to create the masks is hard-coded. Please feel free to check and edit our code to change the colors. The color of the mask images will be different from the colors you see on the web interface (our detailed view or annotation app).
    * This is because our mask uses 8-bit color map to represent pixel values from 0 to 255

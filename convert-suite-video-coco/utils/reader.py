@@ -103,7 +103,6 @@ def read_labels(labels, project_type, categories, images):
     annotations = []
     image_map = {i['id']: i for i in images}
     category_map = {c['name']: c['id'] for c in categories}
-    print(project_type)
     for label_id, label_info in labels.items():
         image_id, label = label_info['image_id'], label_info['label']
         if project_type == 'death-valley':
@@ -113,7 +112,7 @@ def read_labels(labels, project_type, categories, images):
             annotations_in_label = read_siesta_label(
                 label, project_type, category_map, image_map[image_id])
         elif project_type == 'video-project':
-            annotations_in_label = read_video_label(
+            annotations_in_label = read_siesta_label(
                 label, category_map, image_map[image_id])
 
         else:

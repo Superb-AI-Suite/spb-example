@@ -27,7 +27,7 @@ $ pip install -r requirements.txt
 ## Convert Export Results
 
 - Please download and extract exported zip file. You can use sample export zip file from Export Guide page.
-- User manual for export: https://docs.superb-ai.com/user-manual/manipulate-labels/export-and-download-labels
+- User manual for export: https://docs.superb-ai.com/docs/export-and-download-labels
 
 ```
 $ python convert.py --export-dir {EXPORT_DIR} --output-path {OUTPUT_PATH} --dataset-type COCO

@@ -31,7 +31,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--export-dir', type=str, required=True,
                         help='directory of unzipped export result')
-    parser.add_argument('--output-path', type=str, default='instance.json',
+    parser.add_argument('--output-path', type=str,
                         help='output path to save converted dataset')
     args = parser.parse_args()
     process(args)

@@ -22,7 +22,7 @@ $ python convert.py
 ```
 
 ## Create Project in Suite
-* [Official Guide to Create a Project](https://docs.superb-ai.com/user-manual/custom-project/create-a-new-project)
+* [Official Guide to Create a Project](https://docs.superb-ai.com/docs/step-1-project-creation)
 * Creating projects via SDK is WIP. So this time we'll create a project in web.
 * Set any project name you want, but you have to match class names as COCO class name
     * By default converting code, you will have to set 5 classes ['person', 'car', 'chair', 'book', 'bottle']

@@ -19,7 +19,7 @@ $ pip install -r requirements.txt
 * NOTE: deprecated image annotation app is not supported
 
 ## Convert CLI Downloads
-* Download your Suite project using Suite CLI (link)[https://docs.superb-ai.com/developers/command-line-interface/downloading-data-and-labels]
+* Download your Suite project using Suite CLI (link)[https://docs.superb-ai.com/reference/downloading-data-labels]
 ```
 # configure spb cli first, refer to the guide above
 $ mkdir data; cd data
