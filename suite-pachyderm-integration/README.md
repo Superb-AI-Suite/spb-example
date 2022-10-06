@@ -5,7 +5,7 @@
 * Install Superb AI Suite Client and Pachyderm Client
 
 ### Suite Client Installation
-* https://docs.superb-ai.com/developers/command-line-interface/getting-started
+* https://docs.superb-ai.com/reference/getting-started-with-your-api
 ```
 $ pip install spb-cli
 $ spb --version
