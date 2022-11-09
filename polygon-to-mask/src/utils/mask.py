@@ -26,7 +26,7 @@ def create_mask(data_type, project_info, image_info, label_id, label, mask_dir):
             if len(anno["coord"]["points"]) < 3:
                 return None, None
             else:
-                points = [(point["x"], point["y"]) for point in anno["coord"]["points"]]
+                final_pts = [(point["x"], point["y"]) for point in anno["coord"]["points"]]
         else:
             z_index_name = "z_index"
             class_id = "class_id"
@@ -107,8 +107,8 @@ def create_mask(data_type, project_info, image_info, label_id, label, mask_dir):
             mask_draw = ImageDraw.Draw(mask_image)
 
             for polygon in sorted(polygons, key=lambda p: p["zIndex"]):
-                for pts in polygon["points"]:
-                    mask_draw.polygon(pts, fill=polygon[key])
+                # for pts in polygon["points"]:
+                mask_draw.polygon(polygon["points"], fill=polygon[key])
 
             mask_image.save(mask_path, format="PNG")
 
