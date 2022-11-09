@@ -33,8 +33,8 @@ def create_mask(data_type, project_info, image_info, label_id, label, mask_dir):
             final_pts = []
 
             for ls in anno["coord"]["points"]:
+                points = []
                 for i, inner_ls in enumerate(ls):
-                    points = []
                     if i == 0:
                         points.append(
                             [(points["x"], points["y"]) for points in inner_ls]
@@ -45,10 +45,7 @@ def create_mask(data_type, project_info, image_info, label_id, label, mask_dir):
                             [(points["x"], points["y"]) for points in inner_ls]
                         )
                         points.append(inner_pts)
-                if len(points) == 1:
-                    final_pts.append(points[0])
-                else:
-                    final_pts.append(points)
+                final_pts.append(points)
 
         z_index = (
             anno["meta"][z_index_name]
@@ -108,7 +105,22 @@ def create_mask(data_type, project_info, image_info, label_id, label, mask_dir):
 
             for polygon in sorted(polygons, key=lambda p: p["zIndex"]):
                 for pts in polygon["points"]:
-                    mask_draw.polygon(pts, fill=polygon[key])
+                    if len(pts) == 1:
+                        mask_draw.polygon(pts[0], fill=polygon[key])
+                    else:
+                        holes = pts[1]
+                        hole_mask = Image.new("1", (image_info["width"], image_info["height"]), 0)  # generate a binary mask for all holes
+                        hole_draw = ImageDraw.Draw(hole_mask)
+                        for hole in holes:
+                            hole_draw.polygon(hole, 1)
+
+                        blank = Image.new("P", (image_info["width"], image_info["height"])) 
+                        saved_holes = Image.composite(mask_image, blank, hole_mask) # save pixels within holes to new image
+
+                        mask_draw.polygon(pts[0], fill=polygon[key]) # draw polygon
+
+                        mask_image = Image.composite(saved_holes, mask_image, hole_mask) # draw saved pixels over polygon
+                        mask_draw = ImageDraw.Draw(mask_image)         
 
             mask_image.save(mask_path, format="PNG")
 
