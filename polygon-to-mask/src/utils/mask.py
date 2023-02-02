@@ -108,11 +108,11 @@ def create_mask(data_type, project_info, image_info, label_id, label, mask_dir):
                     if len(pts) == 1:
                         mask_draw.polygon(pts[0], fill=polygon[key])
                     else:
-                        holes = pts[1]
+                        holes = pts[1:]
                         hole_mask = Image.new("1", (image_info["width"], image_info["height"]), 0)  # generate a binary mask for all holes
                         hole_draw = ImageDraw.Draw(hole_mask)
                         for hole in holes:
-                            hole_draw.polygon(hole, 1)
+                            hole_draw.polygon(hole[0], 1)
 
                         blank = Image.new("P", (image_info["width"], image_info["height"])) 
                         saved_holes = Image.composite(mask_image, blank, hole_mask) # save pixels within holes to new image
