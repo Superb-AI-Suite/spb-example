@@ -1,2 +1,0 @@
-class ProjectTypeError(Exception):
-    pass
